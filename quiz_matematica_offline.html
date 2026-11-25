@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="Quiz de matemática para a culminância da eletiva, com questões adaptadas de vestibulares e funcionamento offline.">
+<title>Passaporte para o vestibular | Quiz de matemática</title>
+<style>
+:root {
+  --bg:#ecefe9; --paper:#fffefa; --ink:#192a28; --green:#10483e; --muted:#4d635e;
+  --line:#d6ddd2; --light:#e6eee6; --lime:#dcefaa; --mono:ui-monospace,Consolas,monospace;
+  font-family:"Segoe UI",Arial,sans-serif; color:var(--ink); background:var(--bg);
+}
+* {box-sizing:border-box}
+[hidden] {display:none!important}
+body {margin:0; min-height:100dvh; display:flex; flex-direction:column}
+button {font:inherit; cursor:pointer}
+button:disabled {cursor:default}
+button:focus-visible, a:focus-visible, input:focus-visible + span {outline:3px solid #267c68; outline-offset:4px}
+h1,h2,p {margin:0}
+h1,h2 {font-family:Georgia,"Times New Roman",serif; font-weight:normal; letter-spacing:-.045em}
+h2:focus,h1:focus {outline:none}
+.shell {width:min(1120px,calc(100% - 64px)); margin-inline:auto}
+.mast {display:flex; justify-content:space-between; align-items:center; min-height:83px; border-bottom:1px solid #c7d1c5; gap:20px}
+.brand {display:flex; align-items:center; gap:12px; font-size:1rem; font-weight:650; letter-spacing:-.015em}
+.mark {width:35px; height:35px; background:var(--green); color:white; display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(2,1fr); place-items:center; border-radius:6px; padding:3px; font:700 .85rem/1 var(--mono)}
+.utility,.quiet {background:transparent; border:0; color:var(--green); font-weight:650; padding:10px 0; font-size:.9rem}
+.utility {display:flex; align-items:center; gap:8px; white-space:nowrap}
+.utility:hover,.quiet:hover {text-decoration:underline; text-underline-offset:4px}
+.corners {width:16px;height:16px;background:linear-gradient(var(--green),var(--green)) top left/6px 2px,linear-gradient(var(--green),var(--green)) top right/6px 2px,linear-gradient(var(--green),var(--green)) bottom left/6px 2px,linear-gradient(var(--green),var(--green)) bottom right/6px 2px,linear-gradient(var(--green),var(--green)) top left/2px 6px,linear-gradient(var(--green),var(--green)) top right/2px 6px,linear-gradient(var(--green),var(--green)) bottom left/2px 6px,linear-gradient(var(--green),var(--green)) bottom right/2px 6px;background-repeat:no-repeat}
+main {flex:1; display:grid; align-items:center; padding-block:32px}
+.sheet {background:var(--paper); border:1px solid #ced8ce; border-top:4px solid var(--green); border-radius:3px; box-shadow:0 13px 36px #263e2b0d; min-width:0}
+.kicker {text-transform:uppercase; font:700 .84rem/1.5 var(--mono); letter-spacing:.09em; color:var(--green)}
+.hero {display:grid; grid-template-columns:1.175fr 1fr; min-height:491px}
+.hero-content {padding:clamp(34px,5vw,69px); align-self:center}
+.hero h1 {font-size:clamp(3.1rem,6.1vw,5.55rem); line-height:.99; color:var(--green); margin:16px 0 21px}
+.hero h1 span {display:block;font-size:.72em;line-height:1.1;margin-top:.11em}
+.hero p:not(.kicker) {font-size:1.1rem; line-height:1.55; max-width:33ch; color:var(--muted)}
+.hero .button {margin-top:27px}
+.plate {position:relative; margin:24px 24px 24px 0; background:#dfebe1; overflow:hidden; display:grid; place-items:stretch}
+.plate canvas {display:block;width:100%;height:100%;min-height:300px}
+.button {display:inline-flex; justify-content:center; align-items:center; background:var(--green); border:1px solid var(--green); border-radius:5px; color:white; padding:12px 22px; min-height:47px; font-size:1rem; font-weight:650}
+.button:hover {background:#176151}
+.button.secondary {background:transparent; color:var(--green)}
+.button.secondary:hover {background:var(--light)}
+.button:disabled {background:#e1e8df; border-color:#d7e2d7; color:#4e6158}
+.bottom {display:flex; justify-content:space-between; align-items:center; border-top:1px solid #c7d1c5; gap:12px; color:var(--muted); padding-block:11px 15px; flex-wrap:wrap}
+.bottom p {font-size:.9rem}
+.bottom strong {color:var(--green);font-weight:700}
+.flow {padding:clamp(30px,6vw,76px); text-align:center; min-height:410px; display:grid; align-content:center; justify-items:center; gap:16px}
+.flow h2 {font-size:clamp(2.6rem,6vw,5rem); color:var(--green); line-height:1}
+.flow p:not(.kicker) {color:var(--muted); font-size:1.08rem; line-height:1.5; max-width:45ch}
+.flow .button {margin-top:8px}
+.topic-name {width:min(100%,620px);padding:20px 12px; color:var(--green); font-family:Georgia,serif; font-size:clamp(2.2rem,6vw,4.75rem); letter-spacing:-.045em; line-height:1.05; border-block:1px solid var(--line); background:#f0f5ed; min-height:1.55em}
+.rolling .topic-name {animation:shuffle .3s ease-in-out infinite; color:#315d51}
+@keyframes shuffle {50% {opacity:.57;transform:translateY(2px)}}
+.exam {--exam-gutter:clamp(20px,4.3vw,56px);width:min(100%,850px);margin-inline:auto;padding:0 var(--exam-gutter) 26px}
+.exam-mast {display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 16px;margin-inline:calc(-1 * var(--exam-gutter));padding:10px var(--exam-gutter) 12px;background:var(--green);color:#fff}
+.exam-name {font:700 clamp(1.05rem,2.8vw,1.4rem)/1.25 var(--mono);letter-spacing:.04em}
+.exam-mast .origin {font-size:.85rem;line-height:1.35;color:#e2eee7}
+.exam-top {display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 0 15px; border-bottom:1px solid var(--line)}
+.exam-top h2 {font-size:clamp(1.65rem,4vw,2.5rem);line-height:1.08;margin-top:3px;color:var(--green)}
+.clock {min-width:114px; border:1px solid #d5e1d4; border-radius:5px; background:#edf3ea; padding:9px 10px;text-align:center;color:var(--green)}
+.clock span {display:block;font-size:.82rem;font-weight:650}
+.clock output {font:bold 1.55rem/1.28 var(--mono);letter-spacing:.03em}
+.clock.ending {color:#872e24;background:#f9e9e1;border-color:#e5c2b6}
+.time-track {height:3px;background:#e6ede4; margin-top:-1px;overflow:hidden}
+.time-track i {height:100%; display:block; width:100%; background:#397c65; transform-origin:left; transition:transform .18s linear}
+.statement {font:1.18rem/1.44 Georgia,"Times New Roman",serif; margin:17px 0 12px}
+.statement p + p {margin-top:6px}
+.data {margin-top:12px; margin-bottom:4px}
+.table-wrap {overflow-x:auto}
+.data table {border-collapse:collapse;font: .91rem/1.3 "Segoe UI",Arial,sans-serif;width:100%}
+.data th,.data td {padding:5px 9px;text-align:center;border:1px solid var(--line)}
+.data th {background:#eff4ec;color:var(--green);font-weight:650}
+.data th[scope=row] {text-align:left}
+.graph {display:block;width:min(100%,510px);height:150px;background:#f2f7ef;border:1px solid var(--line)}
+.sr-only {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+fieldset {margin:0; padding:0; border:0; min-width:0}
+legend {font-size:.9rem; color:var(--muted); margin-bottom:8px}
+.answers {display:grid;gap:6px}
+.option {position:relative;display:grid;grid-template-columns:31px 1fr;align-items:center;gap:11px; padding:6px 11px; min-height:42px; border:1px solid #d9e0d6; border-radius:4px; cursor:pointer; font-size:1rem; line-height:1.3}
+.option:hover {background:#f1f5ee;border-color:#94ab9d}
+.option:has(input:checked) {background:#edf4e8;border-color:#35765e}
+.option:has(input:disabled) {background:#f4f3ef;color:#645754;cursor:default;border-color:#e3ddd6}
+.option input {position:absolute;opacity:0; width:1px;height:1px}
+.letter {border:1px solid #a3b9ac;border-radius:50%;width:26px;height:26px;display:grid;place-items:center;font:700 .9rem/1 var(--mono);color:var(--green)}
+input:checked + .letter {background:var(--green);color:white;border-color:var(--green)}
+input:disabled + .letter {opacity:.55}
+.actions {margin-top:14px;display:flex;gap:14px;justify-content:space-between;align-items:center}
+.feedback {gap:13px; min-height:430px}
+.feedback .badge {display:grid;place-items:center;border-radius:50%;width:66px;height:66px;font-size:2.15rem; background:var(--light); color:var(--green); margin-bottom:2px; line-height:1}
+.feedback[data-result=success] .badge {background:var(--lime)}
+.feedback[data-result=wrong] .badge,.feedback[data-result=timeout] .badge {background:#f4e9de;color:#843b2d}
+.feedback .actions {margin-top:3px;justify-content:center; flex-wrap:wrap}
+.feedback .button {margin-top:0}
+.feedback .countdown {font-size:.875rem!important;margin-top:6px}
+dialog {width:min(530px,calc(100% - 34px)); border:1px solid var(--line);border-top:4px solid var(--green);border-radius:5px;padding:29px;background:var(--paper);color:var(--ink)}
+dialog::backdrop {background:#112d27a8}
+dialog h2 {font-size:2.4rem;color:var(--green);margin-bottom:10px}
+dialog p,dialog li {line-height:1.55}
+dialog a {color:var(--green);text-underline-offset:3px}
+dialog .button {margin-top:10px}
+@media(max-width:760px) {
+  .shell {width:calc(100% - 32px)}
+  .mast {min-height:68px}
+  main {padding-block:20px}
+  .hero {grid-template-columns:1fr;min-height:0}
+  .hero-content {padding:35px 25px}
+  .hero h1 {font-size:clamp(3rem,10vw,5rem)}
+  .plate {margin:0 14px 14px;height:200px}
+  .plate canvas {min-height:0}
+}
+@media(max-width:410px) {
+  .mast {gap:9px}
+  .brand {gap:7px;font-size:.88rem}
+  .mark {width:30px;height:30px}
+  .utility {font-size:.82rem}
+  .utility .corners {display:none}
+  .clock {min-width:83px}
+  .clock span {font-size:.74rem}
+  .clock output {font-size:1.3rem}
+  .statement {font-size:1.1rem}
+  .actions {gap:8px}
+  .button {padding-inline:13px}
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<header class="shell mast">
+  <div class="brand"><span class="mark" aria-hidden="true"><span>+</span><span>−</span><span>×</span><span>÷</span></span>Culminância da eletiva</div>
+  <button class="utility" id="fullscreen" type="button"><span class="corners" aria-hidden="true"></span><span id="fullscreen-label">Tela cheia</span></button>
+</header>
+<main class="shell">
+  <section id="home" class="sheet hero" aria-labelledby="home-title">
+    <div class="hero-content">
+      <p class="kicker">Quiz de matemática</p>
+      <h1 id="home-title" tabindex="-1">Passaporte <span>para o vestibular</span></h1>
+      <p id="home-intro">Sorteie uma questão, marque a resposta e, se acertar, pegue uma bala na caixa.</p>
+      <button id="start" class="button" type="button">Iniciar sorteio</button>
+    </div>
+    <div class="plate" aria-hidden="true"><canvas id="plot"></canvas></div>
+  </section>
+
+  <section id="draw" class="sheet flow" aria-labelledby="draw-title" hidden>
+    <p class="kicker">Sorteio de conteúdo</p>
+    <h2 id="draw-title" tabindex="-1">Sorteando…</h2>
+    <div id="topic-name" class="topic-name" aria-hidden="true"></div>
+    <p id="draw-info" hidden></p>
+    <button id="open-question" class="button" type="button" hidden>Ver questão</button>
+  </section>
+
+  <section id="question" class="sheet exam" aria-labelledby="question-title" hidden>
+    <header class="exam-mast">
+      <p class="exam-name" id="exam-name"></p>
+      <p class="origin" id="origin"></p>
+    </header>
+    <div class="exam-top">
+      <div>
+        <p class="kicker" id="question-index"></p>
+        <h2 id="question-title" tabindex="-1" aria-describedby="exam-name origin"></h2>
+      </div>
+      <div class="clock" id="clock">
+        <span>Tempo restante</span>
+        <output id="time" aria-live="off" role="timer"></output>
+      </div>
+    </div>
+    <div class="time-track" aria-hidden="true"><i id="time-bar"></i></div>
+    <div id="statement" class="statement"></div>
+    <form id="answer-form">
+      <fieldset>
+        <legend>Marque uma alternativa</legend>
+        <div class="answers" id="choices"></div>
+      </fieldset>
+      <div class="actions">
+        <button class="quiet" id="pass" type="button">Passar a vez</button>
+        <button class="button" id="confirm" type="submit" disabled>Confirmar resposta</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="feedback" class="sheet flow feedback" aria-labelledby="feedback-title" hidden>
+    <div class="badge" id="badge" aria-hidden="true"></div>
+    <h2 id="feedback-title" tabindex="-1"></h2>
+    <p id="feedback-message"></p>
+    <div class="actions" id="feedback-actions" hidden>
+      <button class="button" id="retry" type="button">Tentar de novo</button>
+      <button class="button secondary" id="finish" type="button">Passar a vez</button>
+    </div>
+    <p class="countdown" id="back-count" aria-live="off"></p>
+  </section>
+</main>
+<footer class="shell bottom">
+  <p id="bank-count"></p>
+  <button id="sources-button" class="quiet" type="button">Fontes e tempo de prova</button>
+</footer>
+<dialog id="sources" aria-labelledby="source-title">
+  <h2 id="source-title">Fontes e tempo de prova</h2>
+  <p>Os enunciados foram adaptados. Cada questão indica o caderno e o número do item original. O tempo é a duração total da prova dividida pela quantidade de questões.</p>
+  <ul>
+    <li>ENEM 2023 e 2024, 2º dia: 5 h ÷ 90 = 3 min 20 s. <a href="https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos/2023" target="_blank" rel="noopener">2023</a> e <a href="https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos/2024" target="_blank" rel="noopener">2024</a>.</li>
+    <li>FUVEST 2025, 1ª fase: 5 h ÷ 90 = 3 min 20 s. <a href="https://www.fuvest.br/acervo-vestibular-2025/" target="_blank" rel="noopener">Prova e gabarito</a>.</li>
+    <li>Unicamp 2024, 1ª fase: 5 h ÷ 72 = 4 min 10 s. <a href="https://www.comvest.unicamp.br/vest2024/F1/f12024Q_Y.pdf" target="_blank" rel="noopener">Prova</a> e <a href="https://www.comvest.unicamp.br/wp-content/uploads/2023/10/Q_Y.pdf" target="_blank" rel="noopener">gabarito</a>.</li>
+  </ul>
+  <form method="dialog"><button class="button secondary" type="submit">Fechar</button></form>
+</dialog>
+<script>
+const topics = {
+  stats: "Estatística",
+  prob: "Probabilidade",
+  geo: "Geometria plana",
+  spatial: "Geometria espacial",
+  prop: "Razão e proporção",
+  pct: "Porcentagem",
+  func: "Funções",
+  alg: "Equações e sistemas",
+  seq: "Sequências",
+  count: "Análise combinatória",
+  number: "Números e operações",
+  logic: "Lógica",
+  sets: "Conjuntos",
+  units: "Grandezas e medidas",
+  analytic: "Geometria analítica",
+  log: "Logaritmos"
+};
+
+const exams = {
+  E23: { name:"ENEM 2023", paper:"2º dia · Azul", seconds:200 },
+  E24: { name:"ENEM 2024", paper:"2º dia · Amarelo", seconds:200 },
+  U24: { name:"Unicamp 2024", paper:"1ª fase · Q/Y", seconds:250 },
+  F25: { name:"FUVEST 2025", paper:"1ª fase · V1", seconds:200 }
+};
+
+const bank = [
+  ["E23",137,"stats","Fácil","Em uma empresa, 75 funcionários recebem R$ 2.000 cada e os outros 25 recebem R$ 7.000 cada. Qual é o salário médio dos 100 funcionários?",["R$ 2.000","R$ 2.500","R$ 3.250","R$ 4.500","R$ 9.000"],2],
+  ["E23",138,"prob","Médio","Uma promoção sorteia uma bola de cada uma de duas urnas independentes. Para ganhar, as duas bolas devem ser pretas. Na primeira urna, a chance de tirar uma preta é de 20%. A segunda tem 4 bolas pretas e 12 brancas. Quantas bolas brancas, no mínimo, devem ser acrescentadas à segunda urna para que a chance de ganhar seja de até 1%?",["20","60","64","68","80"],2],
+  ["E23",139,"seq","Médio","Em junho, uma fábrica vendeu 100 unidades do produto I e 150 do produto II. A cada mês, as vendas de I aumentam em 10 unidades e as de II diminuem em 20. A fábrica vai parar de produzir II no mês seguinte ao primeiro em que as vendas de I superarem as de II. Em que mês a produção de II para?",["Junho","Julho","Agosto","Setembro","Outubro"],3],
+  ["E23",141,"prob","Fácil","Concorreram a uma vaga em um alojamento 200 estudantes do primeiro ano, 150 do segundo e 100 do terceiro. Para cada estudante, a urna recebe, respectivamente, 1, 2 ou 3 cartões com seu nome. Um cartão é retirado ao acaso. Qual é a chance de sortear um estudante do terceiro ano?",["1/2","1/3","1/8","2/9","3/8"],4],
+  ["E23",142,"spatial","Médio","Durante 10 dias, 75 pessoas dependerão da água restante em um reservatório cilíndrico de raio 5 m. A água ocupa 1,5 m de altura. Cada pessoa costuma usar 200 litros por dia. Usando π ≈ 3 e 1 m³ = 1.000 L, quantos litros, no mínimo, cada pessoa deve economizar por dia?",["50 L","60 L","80 L","140 L","150 L"],0],
+  ["E23",143,"pct","Fácil","A lista de espera de uma creche tinha 400 nomes e aumentou 10%. Sem obras, ela manterá o tamanho atual no próximo ano. Cada nova sala abre 10 vagas e retira 10 nomes da lista. Quantas salas devem ser abertas para reduzir a lista atual em 25%?",["10","11","13","30","33"],1],
+  ["E23",146,"number","Médio","Disponha os números de 1 a 6, sem repetições, nos três vértices e nos três pontos médios de um triângulo. A soma dos três números em cada lado deve ser igual. Se os três números dos vértices formarem uma progressão aritmética de razão 2, quais são as somas possíveis para um lado?",["Apenas 7","Apenas 9","Apenas 10","9 ou 10","10 ou 11"],4],
+  ["E23",147,"prop","Fácil","Durante 30 dias, cada pessoa de um casal precisa obter 30 g de carboidratos por dia a partir de pão. Um pacote contém 18 fatias, com 15 g de carboidratos cada. Qual é o menor número de pacotes que abastece o casal por todo o período?",["1","4","6","7","8"],3],
+  ["E23",153,"number","Fácil","Cinco caixas começam a atender suas filas agora. Para cada um, a tabela indica o tempo por atendimento e quantas pessoas estão à sua frente. Em qual caixa você começa a ser atendido mais cedo?",["Caixa I","Caixa II","Caixa III","Caixa IV","Caixa V"],4,[["Caixa","I","II","III","IV","V"],["Minutos por cliente","12","6","5","15","9"],["Pessoas à frente","5","9","6","2","3"]]],
+  ["E23",154,"geo","Fácil","Em uma pintura, a Lua é um disco. A ponta de um telhado triangular coincide com o centro do disco, e suas duas bordas inclinadas recortam a Lua do centro até a circunferência. Que nome se dá à região do disco escondida entre essas bordas e o arco?",["Segmento circular","Setor circular","Coroa circular","Semicírculo","Trapézio"],1],
+  ["E23",155,"geo","Fácil","Uma piscina quadrada ocupa 400 m². Uma calçada de 5 m de largura será construída do lado de fora, ao redor de toda a piscina, com contorno externo quadrado. Qual será a área da calçada?",["1.000 m²","900 m²","600 m²","500 m²","400 m²"],3],
+  ["E23",156,"stats","Fácil","Um aplicativo registrou a intensidade do sinal de internet durante uma caminhada de 30 minutos. Por quanto tempo o celular ficou sem sinal, considerando os trechos em que a intensidade é zero?",["6 minutos","8 minutos","10 minutos","14 minutos","24 minutos"],0,{ graph:"signal" }],
+  ["E23",159,"seq","Fácil","Uma população começou com 100 larvas e fica dez vezes maior a cada 3 dias. Após quantos dias ela chegará a 1 milhão de larvas?",["2 dias","4 dias","6 dias","12 dias","18 dias"],3],
+  ["E23",162,"func","Fácil","Uma obra paga R$ 500 de taxa fixa para bombear concreto, mais R$ 250 a cada metro cúbico usado. Se x é o volume em metros cúbicos e y é o preço em reais, qual expressão representa y?",["y = 250x","y = 500x","y = 750x","y = 250x + 500","y = 500x + 250"],3],
+  ["E23",166,"stats","Médio","A tabela registra as horas gastas por dia em quatro atividades. O gasto por hora é de 248 na caminhada, 764 na corrida, 356 na bicicleta e 492 no futebol, todos na mesma unidade. Em qual dia o gasto total foi maior?",["Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira"],2,[["Dia","Caminhada","Corrida","Bicicleta","Futebol"],["Seg.","1","0,5","0","2"],["Ter.","0,5","1","0,5","1"],["Qua.","0","1,5","1","0,5"],["Qui.","0","2","0","0"],["Sex.","0","0,5","0","2,5"]]],
+  ["E23",167,"pct","Médio","Uma escola comprou 6.000 folhas para 1.200 alunos. Agora são 1.150 alunos, e o consumo por aluno será o mesmo. Cada pacote indivisível tem 100 folhas e custa R$ 4. Para caber em um orçamento de R$ 220, em qual faixa fica o desconto percentual mínimo sobre o total?",["Entre 5% e 5,5%","Entre 8% e 8,5%","Entre 11,5% e 12,5%","Entre 19,5% e 20,5%","Entre 3,5% e 4%"],0],
+  ["E23",171,"units","Fácil","O calendário maia usava, entre outras contagens, o ano Haab de 365 dias e o Tzolkin de 260 dias. Uma família governou por 20 ciclos de 52 anos Haab cada. A quantos anos Tzolkin corresponde esse período?",["741","1.040","1.460","2.100","5.200"],2],
+  ["E23",175,"alg","Médio","Cada cartela de metrô contém 9 bilhetes de uma única cor. Duas cartelas azuis e uma vermelha custam R$ 32,40. Um bilhete azul custa R$ 0,05 a mais que o dobro do preço de um bilhete vermelho. Quanto custa uma cartela vermelha?",["R$ 4,68","R$ 6,30","R$ 9,30","R$ 10,50","R$ 10,65"],1],
+  ["E23",178,"func","Fácil","Uma torneira libera água com vazão constante nos primeiros 3 segundos, fecha por 5 segundos e volta a liberar água com a mesma vazão por mais 3 segundos. Como se comporta o volume total que já saiu da torneira durante o ciclo?",["Sobe, desce e sobe","Sobe, fica constante e volta a subir","Fica constante, sobe e fica constante","Sobe o tempo todo","Sobe, volta a zero e sobe"],1],
+  ["E23",180,"stats","Fácil","Um agricultor vai escolher os dois meses consecutivos com a maior média de chuva e plantar no início do primeiro deles. A previsão de outubro a março é, em ordem, 250, 150, 200, 450, 100 e 200 mm. Em que mês ele deve plantar?",["Outubro","Novembro","Dezembro","Janeiro","Fevereiro"],2],
+
+  ["E24",136,"func","Fácil","O custo total para produzir mochilas cresce sempre pelo mesmo valor a cada mochila adicional. Produzir 30 custa R$ 1.050, e produzir 50 custa R$ 1.650. Qual é o custo para produzir 80 mochilas?",["R$ 1.950","R$ 2.400","R$ 2.550","R$ 2.640","R$ 3.150"],2],
+  ["E24",138,"prop","Médio","Uma empresa separou 40% de um contrato de R$ 71.250 para pagar três engenheiros proporcionalmente às horas de trabalho. O primeiro trabalhou 4 dias por 5,5 h/dia, o segundo 5 dias por 4 h/dia e o terceiro 6 dias por 2,5 h/dia. Qual é a diferença entre o maior e o menor pagamento?",["R$ 1.000","R$ 1.500","R$ 3.500","R$ 3.800","R$ 5.250"],2],
+  ["E24",139,"count","Médio","Um hospital pode escolher entre 7 cardiologistas e 6 neurologistas. Quantas equipes diferentes de 5 médicos podem ser formadas com pelo menos 3 cardiologistas?",["126","525","630","735","756"],4],
+  ["E24",140,"prob","Médio","Dois semáforos independentes ficam vermelhos por 15 segundos em cada ciclo de 60 segundos. A prefeitura quer reduzir igualmente o tempo de vermelho dos dois, mantendo o ciclo de 60 segundos. Se um ônibus chega ao acaso, de quantos segundos deve ser a redução para que a chance de encontrar os dois no vermelho seja de 4%?",["1,35 s","3 s","9 s","12,6 s","13,8 s"],1],
+  ["E24",141,"prop","Fácil","Um bairro ocupa ¾ da área de um município e abriga ½ da população municipal. A densidade demográfica é a população dividida pela área. A densidade do bairro equivale a que fração da densidade do município inteiro?",["1/4","1/2","3/4","3/2","2/3"],4],
+  ["E24",142,"number","Fácil","As diagonais das telas de dois celulares medem 3½ e 4⅚ polegadas. Qual é a diferença entre elas, arredondada para uma casa decimal?",["0,1 polegada","0,5 polegada","1,0 polegada","1,3 polegada","1,8 polegada"],3],
+  ["E24",148,"prop","Médio","Dois ônibus saem ao mesmo tempo de terminais separados por 9 km e seguem um em direção ao outro. O ônibus A parte do primeiro terminal a 250 m/min e o B a 150 m/min. A partir do primeiro terminal, as câmeras I a V cobrem, em ordem e sem sobreposição, 20%, 30%, 10%, 10% e 30% do trajeto. Qual câmera registra o encontro?",["Câmera I","Câmera II","Câmera III","Câmera IV","Câmera V"],3],
+  ["E24",149,"prob","Médio","Uma cifra troca cada letra por outra usando um deslocamento fixo no alfabeto. Há 25 deslocamentos possíveis e exatamente um decifra a mensagem. Uma pessoa testa deslocamentos ao acaso, sem repetir os que falharam. Qual expressão dá a chance de acertar exatamente na terceira tentativa?",["1/25 + 1/24 + 1/23","24/25 + 23/24 + 1/23","1/25 × 1/24 × 1/23","24/25 × 23/25 × 1/25","24/25 × 23/24 × 1/23"],4],
+  ["E24",150,"log","Médio","A diferença de magnitude de dois terremotos é dada por M₂ − M₁ = (2/3) log₁₀(E₂/E₁), em que E é a energia liberada. O primeiro teve magnitude 6,9. O segundo liberou dez vezes mais energia. Qual foi sua magnitude, com uma casa decimal?",["5,4","6,2","7,6","8,2","8,4"],2],
+  ["E24",151,"spatial","Médio","Uma folha de 10 cm por 20 cm pode ser enrolada, sem sobreposição, para formar a superfície lateral de um cilindro. Uma dimensão da folha vira a altura e a outra, o comprimento da circunferência da base. Qual é o volume do maior cilindro possível?",["4.000π cm³","2.000π cm³","4.000/π cm³","1.000/π cm³","500/π cm³"],3],
+  ["E24",154,"stats","Fácil","Ler por inteiro seis contratos de serviços digitais leva, respectivamente, 36, 17, 27, 13, 13 e 13 minutos. Qual é o tempo médio de leitura, arredondado para uma casa decimal?",["13,0 min","15,0 min","19,8 min","20,0 min","23,3 min"],2],
+  ["E24",156,"func","Fácil","Um aplicativo de transporte cobra R$ 2 fixos, R$ 0,26 por minuto e R$ 1,40 por quilômetro. Qual fórmula fornece o valor V, em reais, de uma viagem com T minutos e D quilômetros?",["V = 2T + 0,26T + 1,40D","V = 2 + 0,26T + 1,40D","V = 2 + 0,26T + D","V = 0,26T + 1,40D","V = 2 + 1,40T + 0,26D"],1],
+  ["E24",157,"prop","Médio","Uma piscina de 2.500.000 L é preenchida a 6.000 L/min. Uma segunda piscina comporta 2.750.000 L e deve levar 20% a mais de tempo para encher. Qual deve ser a vazão constante na segunda piscina?",["8.250 L/min","7.920 L/min","6.545 L/min","5.500 L/min","5.280 L/min"],3],
+  ["E24",160,"alg","Fácil","Uma doceira cobra R$ 25 por porção e R$ 10 de entrega por pedido. Ela vai alterar a entrega para R$ 15 e ajustar o preço da porção para que um pedido de cinco porções continue com o mesmo total. Qual será o novo preço de cada porção?",["R$ 12,50","R$ 20,00","R$ 24,00","R$ 30,00","R$ 37,50"],2],
+  ["E24",163,"units","Médio","Uma hemácia tem 0,007 mm de diâmetro. Para ser vista, sua imagem precisa medir pelo menos 100 micrômetros, ou 0,1 mm. A ocular de um microscópio amplia 10 vezes, e o aumento total é o produto do aumento da ocular pelo da outra lente. Qual é a menor ampliação disponível para essa outra lente que permite ver a hemácia?",["2 vezes","10 vezes","15 vezes","1,1 vez","1,4 vez"],0],
+  ["E24",164,"stats","Fácil","Ao calcular a média de quatro notas, um estudante dividiu a soma por cinco. O resultado ficou um ponto abaixo da média correta. Qual era a média correta?",["4","5","6","19","21"],1],
+  ["E24",165,"count","Médio","Uma senha deve ter dois algarismos diferentes, seguidos de três letras diferentes. Para os algarismos, há 5 opções, inclusive zero, que pode vir no início. Para as letras, há 10 opções. Quantas senhas podem ser criadas?",["11.520","14.400","18.000","312.000","390.000"],1],
+  ["E24",167,"pct","Fácil","Dois alunos responderam a 200 questões cada. João acertou 75%, e Felipe acertou 30% menos questões que João. O conceito é «regular» de 50% a menos de 60%, «bom» de 60% a menos de 75% e «muito bom» de 75% a menos de 90%. Abaixo de 50%, é «insatisfatório». Quais os conceitos de João e Felipe, nessa ordem?",["Muito bom e bom","Muito bom e regular","Muito bom e insatisfatório","Bom e regular","Bom e insatisfatório"],1],
+  ["E24",169,"seq","Fácil","Na primeira etapa de uma mensagem, uma criança colocou 3 emojis. Em cada etapa seguinte, duplicou todos os emojis que já estavam na mensagem. Quantos emojis havia após a 20ª etapa?",["3 × 2¹⁹","3 × 2²⁰","3 × 2²¹","3 × 2²⁰ − 1","3 × 2²⁰ − 3"],0],
+  ["E24",171,"spatial","Fácil","Um trapézio retângulo tem duas bases paralelas de comprimentos diferentes. Ele gira 360° em torno do lado perpendicular às duas bases. Que sólido o trapézio preenchido gera ao girar?",["Cone","Cilindro","Pirâmide","Tronco de cone","Tronco de pirâmide"],3],
+  ["E24",172,"geo","Fácil","Um campo retangular de futebol media 110 m por 75 m. Após uma reforma, passou a medir 105 m por 68 m. De quantos metros quadrados foi a redução da área?",["24 m²","35 m²","555 m²","1.110 m²","1.145 m²"],3],
+  ["E24",174,"geo","Médio","Um salão tem 1.672 m² de área real. Em uma maquete com escala linear de 1:200, qual é a área do salão, em centímetros quadrados?",["4,18 cm²","8,36 cm²","41,80 cm²","83,60 cm²","418 cm²"],4],
+  ["E24",180,"spatial","Médio","Uma embalagem cilíndrica tem 3 cm de raio e 15 cm de altura. Uma nova embalagem cúbica deve ter 80% do volume da anterior. Com π ≈ 3, qual é a medida da aresta do cubo?",["6 cm","18 cm","6 × √6 cm","6 × ∛6 cm","3 × ∛12 cm"],4],
+
+  ["U24",54,"geo","Fácil","Uma pizzaria cobra proporcionalmente à área da pizza. Quatro pizzas individuais, todas redondas e iguais entre si, custam juntas o mesmo que uma pizza redonda de 20 cm de diâmetro. Qual é o diâmetro de cada pizza individual?",["6 cm","8 cm","10 cm","12 cm"],2],
+  ["U24",55,"logic","Fácil","Três amigas escolhem, cada uma, entre bicicleta e patins. Sempre que Ana usa patins, Carol também usa. Bruna só usa patins se Carol estiver de bicicleta. Se Carol usou patins hoje, o que é possível afirmar com certeza?",["Ana usou patins","Ana usou bicicleta","Bruna usou patins","Bruna usou bicicleta"],3],
+  ["U24",56,"alg","Fácil","Em uma feira de adoção, o total de gatos e pintinhos supera o número de cães em 4. O total de gatos e cães supera o número de pintinhos em 6. Quantos gatos estavam na feira?",["4","5","6","7"],1],
+  ["U24",57,"func","Médio","A entrada de uma caverna tem contorno parabólico. A abertura tem 2 m de largura no chão e 2,5 m de altura no centro. Uma caixa de 1 m de largura fica apoiada no chão, centralizada, para passar pela entrada. Qual é a altura máxima da caixa?",["11/8 m","13/8 m","15/8 m","17/8 m"],2],
+  ["U24",58,"geo","Médio","Um graveto de 50 cm quebrou em três pedaços de comprimentos a ≤ b ≤ c. O pedaço de tamanho b mede 2 cm a mais que o de tamanho a. Com os três pedaços, é impossível montar um triângulo. Qual é o maior valor possível de a?",["9,5 cm","10,5 cm","11,5 cm","12,5 cm"],2],
+  ["U24",59,"sets","Médio","Um número real x deve satisfazer duas condições ao mesmo tempo: x² − 2x − 24 < 0 e 2x − 7 ≤ 0. Quantos números inteiros satisfazem as duas condições?",["3","5","7","9"],2],
+  ["U24",60,"count","Médio","Há 5 frutas diferentes, 3 pirulitos diferentes e 2 pedaços de bolo de sabores distintos. Uma pessoa quer escolher dois itens diferentes, sem importar a ordem. Se escolher um pirulito, deve escolher uma fruta como o outro item. De quantas formas ela pode escolher?",["34","36","45","47"],1],
+  ["U24",61,"prob","Médio","Uma sacola tinha 60 pedras brancas e 40 pretas. Foram retiradas 35 brancas e 25 pretas. Duas das que ficaram serão retiradas ao acaso, sem devolver a primeira. Qual é a chance de sair uma pedra branca em cada retirada?",["7/13","5/13","11/52","7/52"],1],
+
+  ["F25",45,"stats","Médio","Aos 19 anos, a expectativa estimada de vida restante dos homens era 54,7 anos. A média simples entre as estimativas dos homens e das mulheres era 58 anos. Aos 20, a estimativa dos homens era 53,8 anos, e a diferença entre homens e mulheres se manteve. Quais eram a estimativa das mulheres aos 19 e a média simples aos 20, nessa ordem?",["54,7 e 54,7","54,7 e 58","60 e 54","61,3 e 56","61,3 e 57,1"],4],
+  ["F25",70,"seq","Médio","A sequência (aₙ) é uma progressão aritmética de primeiro termo a₁ e razão r. Uma segunda sequência obedece à regra bₙ₊₁ = bₙ + aₙ. Se (bₙ) também é uma progressão aritmética, qual é sua razão?",["a₁","2a₁","r","2r","a₁ + r"],0],
+  ["F25",75,"spatial","Médio","Um vaso tem o formato de dois troncos de cone idênticos unidos pela base menor. Cada tronco tem 12 cm de altura, com raios de 10 cm e 5 cm nas bases. Qual é o volume total? Use V = πh(R² + Rr + r²)/3 para o volume de cada tronco.",["1.400π cm³","2.100π cm³","2.400π cm³","2.600π cm³","2.800π cm³"],0],
+  ["F25",76,"spatial","Médio","Os cilindros C, C₁ e C₂ têm, respectivamente, as medidas (raio, altura) iguais a (r, h), (r, h/2) e (r/2, h). Use V, V₁ e V₂ para seus volumes e A, A₁ e A₂ para suas áreas laterais. Qual par de igualdades é verdadeiro?",["V = V₁ + V₂ e A = A₁ + A₂","V = V₁ + V₂ e A = A₁ + 2A₂","V = V₁ + 2V₂ e A = A₁ + 2A₂","V = V₁ + 2V₂ e A = A₁ + A₂","V = 2V₁ + 2V₂ e A = 2A₁ + 2A₂"],3],
+  ["F25",77,"analytic","Médio","Considere as circunferências x² + y² − 4x = −3 e x² + y² − 4y = −3 no plano cartesiano. Como elas estão posicionadas?",["Têm raios iguais e cruzam-se em dois pontos","Têm raios diferentes e cruzam-se em dois pontos","Tocam-se em um único ponto","Têm o mesmo centro","Têm centros diferentes e não se cruzam"],4]
+].map(([exam, number, topic, difficulty, prompt, options, correct, data]) => ({
+  id: `${exam}-${number}`, exam, number, topic, difficulty, prompt, options, correct, data
+}));
+</script>
+<script>
+"use strict";
+
+const byId = (id) => document.getElementById(id);
+const panels = ["home", "draw", "question", "feedback"].map(byId);
+const clock = byId("clock");
+const time = byId("time");
+const bar = byId("time-bar");
+const choices = byId("choices");
+const confirm = byId("confirm");
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+let screen = "home";
+let lastQuestion = null;
+let question;
+let questionDeadline;
+let stateTimer;
+
+function switchScreen(next, focus) {
+  clearInterval(stateTimer);
+  screen = next;
+  for (const panel of panels) panel.hidden = panel.id !== next;
+  byId(focus).focus({ preventScroll: true });
+  scrollTo(0, 0);
+}
+
+function displayTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+function drawQuestion() {
+  // Cada sorteio usa o banco completo, exceto pela questão recém-exibida.
+  const pool = bank.filter((item) => item.id !== lastQuestion);
+  question = pool[Math.floor(Math.random() * pool.length)];
+  lastQuestion = question.id;
+  const draw = byId("draw");
+  const title = byId("draw-title");
+  const topic = byId("topic-name");
+  const details = byId("draw-info");
+  const next = byId("open-question");
+  const exam = exams[question.exam];
+
+  title.textContent = "Sorteando…";
+  topic.textContent = "Matemática";
+  topic.setAttribute("aria-hidden", "true");
+  details.hidden = true;
+  next.hidden = true;
+  draw.classList.add("rolling");
+  switchScreen("draw", "draw-title");
+
+  function reveal() {
+    clearInterval(stateTimer);
+    draw.classList.remove("rolling");
+    title.textContent = "Conteúdo sorteado";
+    topic.textContent = topics[question.topic];
+    topic.removeAttribute("aria-hidden");
+    details.textContent = `${question.difficulty} · ${exam.name} · ${displayTime(exam.seconds)} para responder`;
+    details.hidden = false;
+    next.hidden = false;
+    next.setAttribute("aria-label", `Ver questão de ${topics[question.topic]}`);
+    next.focus({ preventScroll: true });
+  }
+
+  if (reducedMotion.matches) {
+    reveal();
+    return;
+  }
+  const names = Object.values(topics);
+  const offset = Math.floor(Math.random() * names.length);
+  let step = 0;
+  stateTimer = setInterval(() => {
+    topic.textContent = names[(offset + step) % names.length];
+    step += 1;
+    if (step >= 10) reveal();
+  }, 105);
+}
+
+function drawTable(rows) {
+  const wrap = document.createElement("div");
+  wrap.className = "data table-wrap";
+  const table = document.createElement("table");
+  const head = table.createTHead();
+  const body = table.createTBody();
+  rows.forEach((row, y) => {
+    const tr = (y === 0 ? head : body).insertRow();
+    row.forEach((value, x) => {
+      const cell = document.createElement(y === 0 || x === 0 ? "th" : "td");
+      if (y === 0 || x === 0) cell.scope = y === 0 ? "col" : "row";
+      cell.textContent = value;
+      tr.append(cell);
+    });
+  });
+  wrap.append(table);
+  return wrap;
+}
+
+function drawSignal(parent) {
+  const graph = document.createElement("canvas");
+  graph.className = "data graph";
+  graph.setAttribute("role", "img");
+  graph.setAttribute("aria-label", "Intensidade do sinal de 0 a 30 minutos. A linha toca o nível zero aos 10 minutos, volta a subir aos 12, atinge zero novamente aos 16 e volta a subir aos 20. Nos demais momentos o sinal é positivo.");
+  parent.append(graph);
+  const { ctx, w, h } = fitCanvas(graph);
+  const x0 = 38;
+  const y0 = h - 39;
+  const x = (minute) => x0 + (w - x0 - 15) * minute / 30;
+  const y = (level) => y0 - (y0 - 27) * level / 4;
+  ctx.font = "12px Segoe UI, sans-serif";
+  ctx.fillStyle = "#1f5046";
+  ctx.fillText("Intensidade do sinal", x0, 17);
+  ctx.fillText("Tempo (min)", w - 87, h - 8);
+  ctx.textAlign = "center";
+  ctx.strokeStyle = "#ccddd0";
+  for (let m = 0; m <= 30; m += 2) {
+    ctx.beginPath();
+    ctx.moveTo(x(m), y(4));
+    ctx.lineTo(x(m), y0);
+    ctx.stroke();
+    if (w >= 370 || m % 4 === 0 || m === 10 || m === 30) {
+      ctx.fillText(m, x(m), y0 + 15);
+    }
+  }
+  ctx.strokeStyle = "#315d52";
+  ctx.beginPath();
+  ctx.moveTo(x0, y(4));
+  ctx.lineTo(x0, y0);
+  ctx.lineTo(x(30), y0);
+  ctx.stroke();
+  ctx.fillText("0", x0 - 13, y0 + 4);
+  const points = [[0,3],[2,2],[4,3],[6,2],[8,1],[10,0],[12,0],[14,2],[16,0],[20,0],[22,3],[24,2],[26,3],[28,2],[30,4]];
+  ctx.strokeStyle = "#12624d";
+  ctx.lineWidth = 2.75;
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  points.forEach(([minute, level], index) => {
+    if (index === 0) ctx.moveTo(x(minute), y(level));
+    else ctx.lineTo(x(minute), y(level));
+  });
+  ctx.stroke();
+}
+
+function askQuestion() {
+  if (screen !== "draw" || byId("open-question").hidden) return;
+  const exam = exams[question.exam];
+  byId("question-index").textContent = `Questão · Nível ${question.difficulty.toLowerCase()}`;
+  byId("question-title").textContent = topics[question.topic];
+  byId("exam-name").textContent = exam.name;
+  byId("origin").textContent = `${exam.paper} · Adaptada do item ${question.number}`;
+  const statement = byId("statement");
+  const paragraph = document.createElement("p");
+  paragraph.textContent = question.prompt;
+  statement.replaceChildren(paragraph);
+  choices.replaceChildren();
+  for (const [index, option] of question.options.entries()) {
+    const row = document.createElement("label");
+    row.className = "option";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "answer";
+    input.value = String(index);
+    const letter = document.createElement("span");
+    letter.className = "letter";
+    letter.textContent = String.fromCharCode(65 + index);
+    const label = document.createElement("span");
+    label.textContent = option;
+    row.append(input, letter, label);
+    choices.append(row);
+  }
+  if (Array.isArray(question.data)) statement.append(drawTable(question.data));
+  confirm.disabled = true;
+  const duration = exam.seconds * 1000;
+  questionDeadline = performance.now() + duration;
+  function tick() {
+    const remaining = Math.max(0, questionDeadline - performance.now());
+    const seconds = Math.ceil(remaining / 1000);
+    time.textContent = displayTime(seconds);
+    clock.classList.toggle("ending", seconds <= 20);
+    bar.style.transform = `scaleX(${remaining / duration})`;
+    if (remaining === 0) showFeedback("timeout");
+  }
+  switchScreen("question", "question-title");
+  if (question.data?.graph === "signal") drawSignal(statement);
+  tick();
+  stateTimer = setInterval(tick, 100);
+}
+
+const feedbackSeconds = 10;
+const results = {
+  success: ["✓", "Parabéns, você acertou!", "Pode pegar uma bala na caixa."],
+  wrong: ["×", "Resposta incorreta", "Tente uma nova questão ou passe a vez."],
+  timeout: ["◷", "Tempo esgotado", "Passe a vez para o próximo participante."],
+  pass: ["–", "Vez passada", "Agora é a vez do próximo participante."]
+};
+
+function goHome() {
+  switchScreen("home", "start");
+}
+
+function showFeedback(result) {
+  if (screen !== "question") return;
+  const [symbol, heading, message] = results[result];
+  byId("feedback").dataset.result = result;
+  byId("badge").textContent = symbol;
+  byId("feedback-title").textContent = heading;
+  byId("feedback-message").textContent = message;
+  byId("feedback-actions").hidden = result !== "wrong";
+  const notice = byId("back-count");
+  const end = performance.now() + feedbackSeconds * 1000;
+  notice.textContent = `Voltando ao início em ${feedbackSeconds} s.`;
+  switchScreen("feedback", "feedback-title");
+  stateTimer = setInterval(() => {
+    const remaining = Math.ceil((end - performance.now()) / 1000);
+    if (remaining <= 0) goHome();
+    else notice.textContent = `Voltando ao início em ${remaining} s.`;
+  }, 80);
+}
+
+byId("start").addEventListener("click", drawQuestion);
+byId("open-question").addEventListener("click", askQuestion);
+byId("pass").addEventListener("click", () => showFeedback("pass"));
+byId("finish").addEventListener("click", goHome);
+byId("retry").addEventListener("click", drawQuestion);
+choices.addEventListener("change", () => { confirm.disabled = false; });
+byId("answer-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (screen !== "question") return;
+  const selection = choices.querySelector("input:checked");
+  if (performance.now() >= questionDeadline) showFeedback("timeout");
+  else if (selection) showFeedback(Number(selection.value) === question.correct ? "success" : "wrong");
+});
+
+const sources = byId("sources");
+byId("sources-button").addEventListener("click", () => sources.showModal());
+document.addEventListener("keydown", (event) => {
+  if (screen !== "question" || sources.open || event.altKey || event.ctrlKey || event.metaKey) return;
+  const key = event.key.toUpperCase();
+  if (!/^[A-E]$/.test(key)) return;
+  const option = choices.querySelectorAll("input")[key.charCodeAt(0) - 65];
+  if (!option) return;
+  event.preventDefault();
+  option.focus();
+  option.click();
+});
+
+const fullscreen = byId("fullscreen");
+fullscreen.hidden = !document.fullscreenEnabled;
+fullscreen.addEventListener("click", async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch {
+    fullscreen.hidden = true;
+  }
+});
+document.addEventListener("fullscreenchange", () => {
+  byId("fullscreen-label").textContent = document.fullscreenElement ? "Sair da tela cheia" : "Tela cheia";
+});
+
+function fitCanvas(canvas) {
+  const { width:w, height:h } = canvas.getBoundingClientRect();
+  const scale = devicePixelRatio || 1;
+  canvas.width = Math.round(w * scale);
+  canvas.height = Math.round(h * scale);
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  return { ctx, w, h };
+}
+
+function drawCover() {
+  const plot = byId("plot");
+  if (byId("home").hidden) return;
+  const { ctx, w, h } = fitCanvas(plot);
+  if (w === 0 || h === 0) return;
+  const cell = Math.max(17, Math.min(w,h) / 19);
+  const cx = w * .50;
+  const cy = h * .54;
+  const radius = Math.min(w,h) * .288;
+  ctx.strokeStyle = "#c6d9ca";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x = cx % cell; x < w; x += cell) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+  }
+  for (let y = cy % cell; y < h; y += cell) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = "#cadfc9";
+  ctx.beginPath();
+  ctx.arc(cx,cy,radius,0,Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = "#789f89";
+  ctx.beginPath();
+  ctx.moveTo(0,cy);
+  ctx.lineTo(w,cy);
+  ctx.moveTo(cx,0);
+  ctx.lineTo(cx,h);
+  ctx.stroke();
+
+  const angle = -Math.PI * .27;
+  const px = cx + radius * Math.cos(angle);
+  const py = cy + radius * Math.sin(angle);
+  ctx.fillStyle = "#dcefaa";
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+radius,cy);
+  ctx.arc(cx,cy,radius,0,angle,true);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = "#1d5b4d";
+  ctx.lineWidth = 1.65;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx,cy,radius,0,Math.PI*2);
+  ctx.stroke();
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();
+  ctx.moveTo(px,py);
+  ctx.lineTo(px,cy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#1d5b4d";
+  for (const [x,y] of [[px,py],[cx,cy],[cx+radius,cy]]) {
+    ctx.beginPath();
+    ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.font = 'italic 17px Georgia, serif';
+  ctx.fillText("θ",cx + radius * .23,cy - 8);
+  ctx.fillText("x",w - 19,cy - 9);
+  ctx.fillText("y",cx + 9,19);
+  ctx.fillText("r",cx + radius * .50,cy + 18);
+}
+
+new ResizeObserver(drawCover).observe(byId("plot"));
+byId("bank-count").append(Object.assign(document.createElement("strong"), {
+  textContent: `${bank.length} questões`
+}), " · Níveis fácil e médio");
+</script>
+</body>
+</html>
